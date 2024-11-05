@@ -47,8 +47,8 @@ export class AuthService {
   async login(user: any) {
     const payload = { username: user.username, sub: user._id };
     return {
-      access_token: this.jwtService.sign(payload, { expiresIn: '1h' }),
-      refresh_token: this.jwtService.sign(payload, { expiresIn: '7d' }), // Refresh token valid for 7 days
+      access_token: this.jwtService.sign(payload),
+      refresh_token: this.jwtService.sign(payload, { expiresIn: '7d' }),
       userId: user._id,
     };
   }
