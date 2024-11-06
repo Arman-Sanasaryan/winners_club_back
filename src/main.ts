@@ -5,7 +5,7 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.enableCors({
     origin: (origin, callback) => {
-      const allowedOrigins = ['https://winners-club-front.vercel.app'];
+      const allowedOrigins = ['https://calculator.winnersclub.io'];
       if (allowedOrigins.includes(origin) || !origin) {
         callback(null, true);
       } else {
