@@ -12,7 +12,6 @@ import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class AuthService {
-  private readonly validAccessKey = 'arm123$';
 
   constructor(
     @InjectModel(User.name) private userModel: Model<UserDocument>,
@@ -22,13 +21,12 @@ export class AuthService {
   async signUp(createUserDto: CreateUserDto): Promise<any> {
     const { username, email, password, accessKey } = createUserDto;
 
-    if (accessKey !== this.validAccessKey) {
-      throw new BadRequestException('Invalid access key');
-    }
-
-    const isUserExists = await this.userModel.findOne({ email });
-    if (isUserExists) {
-      throw new UnauthorizedException('User already exists');
+    const existingUser = await this.userModel.findOne({ email });
+    if (existingUser) {
+      existingUser.accessKey = accessKey;
+      existingUser.accessKeyCreatedAt = new Date();
+      await existingUser.save();
+      return this.login(existingUser);
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -38,6 +36,7 @@ export class AuthService {
       email,
       password: hashedPassword,
       accessKey,
+      accessKeyCreatedAt: new Date(),
     });
 
     await user.save();
@@ -45,6 +44,14 @@ export class AuthService {
   }
 
   async login(user: any) {
+    if (user.accessKeyCreatedAt) {
+      const now = new Date();
+      const accessKeyAge = now.getTime() - user.accessKeyCreatedAt.getTime();
+      if (accessKeyAge > 30 * 24 * 60 * 60 * 1000) {
+        throw new UnauthorizedException('Access key expired');
+      }
+    }
+
     const payload = { username: user.username, sub: user._id };
     return {
       access_token: this.jwtService.sign(payload, { expiresIn: '4h' }),
@@ -58,12 +65,12 @@ export class AuthService {
       const payload = this.jwtService.verify(refreshToken);
       const newAccessToken = this.jwtService.sign(
         { username: payload.username, sub: payload.sub },
-        { expiresIn: '1h' },
+        { expiresIn: '4h' },
       );
 
       const newRefreashToken = this.jwtService.sign(
         { username: payload.username, sub: payload.sub },
-        { expiresIn: '7h' },
+        { expiresIn: '7d' },
       );
       return { access_token: newAccessToken, refresh_token: newRefreashToken };
     } catch (e) {
@@ -73,8 +80,13 @@ export class AuthService {
 
   async validateUser(username: string, pass: string): Promise<any> {
     const user = await this.userModel.findOne({ username });
-    if (user && (await bcrypt.compare(pass, user.password))) {
-      const { password, ...result } = user.toObject();
+    if (user) {
+      const now = new Date();
+      const accessKeyAge = now.getTime() - user.accessKeyCreatedAt.getTime();
+      if (accessKeyAge > 30 * 24 * 60 * 60 * 1000) {
+        throw new UnauthorizedException('Access key expired');
+      }
+      const { ...result } = user.toObject();
       return result;
     }
     return null;
