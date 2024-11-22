@@ -8,4 +8,7 @@ export class UserService {
   constructor(@InjectModel(User.name) private userModel: Model<UserDocument>) {}
 
   // Define methods for user management if needed
+  async getAllUsers(): Promise<UserDocument[]> {
+    return this.userModel.find().exec();
+  }
 }
