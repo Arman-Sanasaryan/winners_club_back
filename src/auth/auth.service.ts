@@ -21,7 +21,9 @@ export class AuthService {
   async signUp(createUserDto: CreateUserDto): Promise<any> {
     const { username, email, password, accessKey } = createUserDto;
 
-    const existingUser = await this.userModel.findOne({ email });
+    const normalizedEmail = email.toLowerCase();
+
+    const existingUser = await this.userModel.findOne({ email: normalizedEmail });
     if (existingUser) {
       existingUser.accessKey = accessKey;
       existingUser.accessKeyCreatedAt = new Date();
@@ -33,7 +35,7 @@ export class AuthService {
 
     const user = new this.userModel({
       username,
-      email,
+      email: normalizedEmail,
       password: hashedPassword,
       accessKey,
       accessKeyCreatedAt: new Date(),
