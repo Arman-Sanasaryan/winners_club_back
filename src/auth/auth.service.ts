@@ -49,15 +49,15 @@ export class AuthService {
     if (user.accessKeyCreatedAt) {
       const now = new Date();
       const accessKeyAge = now.getTime() - user.accessKeyCreatedAt.getTime();
-      if (accessKeyAge > 30 * 24 * 60 * 60 * 1000) {
+      if (accessKeyAge > 300 * 24 * 60 * 60 * 1000) {
         throw new UnauthorizedException('Access key expired');
       }
     }
 
     const payload = { username: user.username, sub: user._id };
     return {
-      access_token: this.jwtService.sign(payload, { expiresIn: '4h' }),
-      refresh_token: this.jwtService.sign(payload, { expiresIn: '7d' }),
+      access_token: this.jwtService.sign(payload, { expiresIn: '1h' }),
+      refresh_token: this.jwtService.sign(payload, { expiresIn: '3d' }),
       userId: user._id,
     };
   }
@@ -67,12 +67,12 @@ export class AuthService {
       const payload = this.jwtService.verify(refreshToken);
       const newAccessToken = this.jwtService.sign(
         { username: payload.username, sub: payload.sub },
-        { expiresIn: '4h' },
+        { expiresIn: '1h' },
       );
 
       const newRefreashToken = this.jwtService.sign(
         { username: payload.username, sub: payload.sub },
-        { expiresIn: '7d' },
+        { expiresIn: '3d' },
       );
       return { access_token: newAccessToken, refresh_token: newRefreashToken };
     } catch (e) {
@@ -85,7 +85,7 @@ export class AuthService {
     if (user) {
       const now = new Date();
       const accessKeyAge = now.getTime() - user.accessKeyCreatedAt.getTime();
-      if (accessKeyAge > 30 * 24 * 60 * 60 * 1000) {
+      if (accessKeyAge > 300 * 24 * 60 * 60 * 1000) {
         throw new UnauthorizedException('Access key expired');
       }
       const { ...result } = user.toObject();
