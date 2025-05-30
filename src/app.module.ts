@@ -10,7 +10,7 @@ import { GeneralDataModule } from './general-data/general-data.module';
 @Module({
   imports: [
     MongooseModule.forRoot(
-      'mongodb://armansanasaryan91:cJi8bdNtvYNC4G2@ac-ybavc9g-shard-00-00.fgwreq1.mongodb.net:27017,ac-ybavc9g-shard-00-01.fgwreq1.mongodb.net:27017,ac-ybavc9g-shard-00-02.fgwreq1.mongodb.net:27017/?ssl=true&replicaSet=atlas-tj7yiu-shard-0&authSource=admin&retryWrites=true&w=majority',
+      'mongodb+srv://armansanasaryan91:cJi8bdNtvYNC4G2@cluster0.fgwreq1.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0',
     ),
     AuthModule,
     UserModule,
@@ -21,5 +21,3 @@ import { GeneralDataModule } from './general-data/general-data.module';
   providers: [AppService],
 })
 export class AppModule {}
-// mongodb+srv://armansanasaryan91:cJi8bdNtvYNC4G2@cluster0.fgwreq1.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0'
-// mongodb://armansanasaryan91:cJi8bdNtvYNC4G2@ac-ybavc9g-shard-00-00.fgwreq1.mongodb.net:27017,ac-ybavc9g-shard-00-01.fgwreq1.mongodb.net:27017,ac-ybavc9g-shard-00-02.fgwreq1.mongodb.net:27017/?ssl=true&replicaSet=atlas-tj7yiu-shard-0&authSource=admin&retryWrites=true&w=majority
